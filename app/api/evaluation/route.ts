@@ -6,7 +6,7 @@ export async function GET() {
     email: "aryan@theagi.company",
     repositoryUrl: "https://github.com/aryan/hintro",
     deployedUrl: process.env.NEXT_PUBLIC_APP_URL ?? "https://hintro.vercel.app",
-    externalIntegration: "Resend (Email)",
+    externalIntegration: "Discord Webhook + Resend (Email)",
     features: [
       "Authentication (JWT)",
       "Meeting Management with Pagination",
