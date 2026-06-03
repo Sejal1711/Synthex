@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Brain } from "lucide-react";
+import { Brain, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 
 export default function LoginPage() {
@@ -33,15 +33,45 @@ export default function LoginPage() {
     router.push("/");
   }
 
+  function fillDemo() {
+    setEmail("demo@synthex.app");
+    setPassword("demo1234");
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="w-full max-w-sm">
       <div className="absolute top-4 right-4"><ThemeToggle /></div>
+
       <div className="flex items-center justify-center gap-2 mb-6">
         <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center">
           <Brain className="h-5 w-5 text-primary-foreground" />
         </div>
-        <span className="text-xl font-bold text-foreground">Hintro</span>
+        <span className="text-xl font-bold text-foreground">Synthex</span>
       </div>
+
+      {/* Demo banner */}
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mb-4 rounded-xl border border-primary/20 bg-primary/5 p-3"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold text-primary flex items-center gap-1">
+              <Sparkles className="h-3 w-3" /> Try the demo
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Pre-loaded with meetings, AI analysis & action items.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" onClick={fillDemo}
+            className="shrink-0 text-xs h-7 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground">
+            Use Demo
+          </Button>
+        </div>
+      </motion.div>
+
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">Welcome back</CardTitle>
