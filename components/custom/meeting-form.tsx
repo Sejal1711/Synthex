@@ -8,16 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, ArrowRight, ClipboardPaste, List } from "lucide-react";
+import { Plus, Trash2, ArrowRight, ClipboardPaste, Edit2 } from "lucide-react";
 
 interface TranscriptEntry { timestamp: string; speaker: string; text: string; }
 
-// Parses a raw transcript block into structured entries.
-// Supports formats:
-//   [00:10] Alice: Hello everyone.
-//   00:10 Alice: Hello everyone.
-//   Alice (00:10): Hello everyone.
-//   Alice: Hello everyone.   (no timestamp — auto-assigns 00:00, 00:01, ...)
 function parseTranscript(raw: string): TranscriptEntry[] {
   const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
   const entries: TranscriptEntry[] = [];
@@ -26,27 +20,20 @@ function parseTranscript(raw: string): TranscriptEntry[] {
   for (const line of lines) {
     // [00:10] Speaker: text  OR  00:10 Speaker: text
     const m1 = line.match(/^\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s+([^:]+):\s+(.+)$/);
-    if (m1) {
-      entries.push({ timestamp: m1[1], speaker: m1[2].trim(), text: m1[3].trim() });
-      continue;
-    }
+    if (m1) { entries.push({ timestamp: m1[1], speaker: m1[2].trim(), text: m1[3].trim() }); continue; }
     // Speaker (00:10): text
     const m2 = line.match(/^([^(]+)\((\d{1,2}:\d{2}(?::\d{2})?)\):\s+(.+)$/);
-    if (m2) {
-      entries.push({ timestamp: m2[2].trim(), speaker: m2[1].trim(), text: m2[3].trim() });
-      continue;
-    }
-    // Speaker: text  (no timestamp)
+    if (m2) { entries.push({ timestamp: m2[2].trim(), speaker: m2[1].trim(), text: m2[3].trim() }); continue; }
+    // Speaker: text (no timestamp)
     const m3 = line.match(/^([^:]+):\s+(.+)$/);
     if (m3) {
       const mins = String(autoMinute).padStart(2, "0");
       entries.push({ timestamp: `${mins}:00`, speaker: m3[1].trim(), text: m3[2].trim() });
       autoMinute++;
-      continue;
     }
   }
 
-  return entries.length > 0 ? entries : [{ timestamp: "00:00", speaker: "", text: lines[0] ?? "" }];
+  return entries.length > 0 ? entries : [];
 }
 
 export function MeetingForm() {
@@ -57,23 +44,26 @@ export function MeetingForm() {
   const [title, setTitle] = useState("");
   const [meetingDate, setMeetingDate] = useState("");
   const [participants, setParticipants] = useState<string[]>(["", ""]);
-  const [transcript, setTranscript] = useState<TranscriptEntry[]>([{ timestamp: "00:00", speaker: "", text: "" }]);
-  const [mode, setMode] = useState<"manual" | "paste">("paste");
   const [rawText, setRawText] = useState("");
+  const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [parsed, setParsed] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   function addParticipant() { setParticipants((p) => [...p, ""]); }
   function updateParticipant(i: number, v: string) { setParticipants((p) => p.map((x, j) => j === i ? v : x)); }
   function removeParticipant(i: number) { setParticipants((p) => p.filter((_, j) => j !== i)); }
-  function addEntry() { setTranscript((t) => [...t, { timestamp: "", speaker: "", text: "" }]); }
-  function updateEntry(i: number, field: keyof TranscriptEntry, value: string) { setTranscript((t) => t.map((e, j) => j === i ? { ...e, [field]: value } : e)); }
+  function updateEntry(i: number, field: keyof TranscriptEntry, value: string) {
+    setTranscript((t) => t.map((e, j) => j === i ? { ...e, [field]: value } : e));
+  }
   function removeEntry(i: number) { setTranscript((t) => t.filter((_, j) => j !== i)); }
+  function addEntry() { setTranscript((t) => [...t, { timestamp: "", speaker: "", text: "" }]); }
 
   function handleParse() {
     const entries = parseTranscript(rawText);
+    if (entries.length === 0) { setError("Could not parse transcript. Make sure each line has a Speaker: text format."); return; }
     setTranscript(entries);
     setParsed(true);
-    setMode("manual");
+    setError("");
   }
 
   async function handleSubmit() {
@@ -95,8 +85,6 @@ export function MeetingForm() {
     router.push(`/meetings/${data.data.meeting.id}`);
   }
 
-  const validEntries = transcript.filter((e) => e.speaker && e.text).length;
-
   return (
     <div className="space-y-6">
       {/* Step indicator */}
@@ -113,6 +101,8 @@ export function MeetingForm() {
       {error && <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">{error}</p>}
 
       <AnimatePresence mode="wait">
+
+        {/* STEP 1 */}
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} className="space-y-4">
             <Card>
@@ -152,111 +142,98 @@ export function MeetingForm() {
           </motion.div>
         )}
 
+        {/* STEP 2 */}
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} className="space-y-4">
 
-            {/* Mode toggle */}
-            <div className="flex gap-2">
-              <Button
-                type="button" size="sm"
-                variant={mode === "paste" ? "default" : "outline"}
-                onClick={() => { setMode("paste"); setParsed(false); }}
-                className="gap-1.5 text-xs"
-              >
-                <ClipboardPaste className="h-3.5 w-3.5" />
-                Paste Transcript
-              </Button>
-              <Button
-                type="button" size="sm"
-                variant={mode === "manual" ? "default" : "outline"}
-                onClick={() => setMode("manual")}
-                className="gap-1.5 text-xs"
-              >
-                <List className="h-3.5 w-3.5" />
-                Manual Entry
-              </Button>
-            </div>
+            {/* PASTE BOX — shown until parsed */}
+            {!parsed && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Paste Transcript</CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Paste your full transcript. Supports <code className="bg-muted px-1 rounded">[00:10] Speaker: text</code> or <code className="bg-muted px-1 rounded">Speaker: text</code>
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Textarea
+                    value={rawText}
+                    onChange={(e) => setRawText(e.target.value)}
+                    placeholder={`[00:01] Alice: We should launch next Friday.\n[00:20] Bob: I will prepare the release notes.\n[00:35] Alice: Let's also schedule a review call.`}
+                    className="min-h-[260px] text-sm font-mono resize-y"
+                  />
+                  <Button onClick={handleParse} disabled={!rawText.trim()} className="w-full gap-2">
+                    <ClipboardPaste className="h-4 w-4" />
+                    Parse Transcript
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-            <AnimatePresence mode="wait">
-
-              {/* PASTE MODE */}
-              {mode === "paste" && (
-                <motion.div key="paste" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Paste Full Transcript</CardTitle>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Supports formats like:<br />
-                        <code className="bg-muted px-1 rounded">[00:10] Alice: text</code>{" · "}
-                        <code className="bg-muted px-1 rounded">00:10 Alice: text</code>{" · "}
-                        <code className="bg-muted px-1 rounded">Alice: text</code>
-                      </p>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <Textarea
-                        value={rawText}
-                        onChange={(e) => setRawText(e.target.value)}
-                        placeholder={`[00:10] Alice: We should launch next Friday.\n[00:20] Bob: I will prepare the release notes.\n[00:35] Alice: Let's schedule a review on Thursday.`}
-                        className="min-h-[220px] text-sm font-mono resize-y"
-                      />
-                      <Button
-                        onClick={handleParse}
-                        disabled={!rawText.trim()}
-                        className="w-full gap-2"
-                      >
-                        <ClipboardPaste className="h-4 w-4" />
-                        Parse Transcript
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-
-              {/* MANUAL MODE */}
-              {mode === "manual" && (
-                <motion.div key="manual" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">Transcript Entries</CardTitle>
-                        {parsed && (
-                          <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                            {validEntries} entries parsed
-                          </span>
-                        )}
+            {/* PARSED PREVIEW */}
+            {parsed && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-base">Transcript Ready</CardTitle>
+                        <p className="text-xs text-muted-foreground mt-0.5">{transcript.length} entries parsed</p>
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {transcript.map((entry, i) => (
-                        <div key={i} className="grid grid-cols-[80px_1fr_auto] gap-2 items-start">
-                          <Input value={entry.timestamp} onChange={(e) => updateEntry(i, "timestamp", e.target.value)} placeholder="00:00" className="text-xs font-mono" />
-                          <div className="space-y-2">
-                            <Input value={entry.speaker} onChange={(e) => updateEntry(i, "speaker", e.target.value)} placeholder="Speaker" className="text-sm" />
-                            <Textarea value={entry.text} onChange={(e) => updateEntry(i, "text", e.target.value)} placeholder="What was said..." className="text-sm min-h-[56px] resize-none" />
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="text-xs h-7 gap-1"
+                          onClick={() => { setParsed(false); setEditing(false); }}>
+                          Re-paste
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-xs h-7 gap-1"
+                          onClick={() => setEditing((e) => !e)}>
+                          <Edit2 className="h-3 w-3" />
+                          {editing ? "Done" : "Edit"}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {!editing ? (
+                      // Read-only preview
+                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        {transcript.map((entry, i) => (
+                          <div key={i} className="flex gap-2 text-sm">
+                            <span className="text-xs font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded shrink-0 self-start mt-0.5">{entry.timestamp}</span>
+                            <span className="font-medium text-foreground shrink-0">{entry.speaker}:</span>
+                            <span className="text-muted-foreground">{entry.text}</span>
                           </div>
-                          {transcript.length > 1 && (
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeEntry(i)} className="text-muted-foreground hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
+                        ))}
+                      </div>
+                    ) : (
+                      // Edit mode
+                      <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                        {transcript.map((entry, i) => (
+                          <div key={i} className="grid grid-cols-[72px_1fr_auto] gap-2 items-start">
+                            <Input value={entry.timestamp} onChange={(e) => updateEntry(i, "timestamp", e.target.value)} className="text-xs font-mono h-8" />
+                            <div className="space-y-1.5">
+                              <Input value={entry.speaker} onChange={(e) => updateEntry(i, "speaker", e.target.value)} placeholder="Speaker" className="text-xs h-8" />
+                              <Textarea value={entry.text} onChange={(e) => updateEntry(i, "text", e.target.value)} className="text-xs min-h-[48px] resize-none" />
+                            </div>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeEntry(i)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
-                          )}
-                        </div>
-                      ))}
-                      <Button type="button" variant="ghost" size="sm" onClick={addEntry} className="text-muted-foreground hover:text-foreground">
-                        <Plus className="h-3.5 w-3.5 mr-1" />Add entry
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                          </div>
+                        ))}
+                        <Button type="button" variant="ghost" size="sm" onClick={addEntry} className="text-muted-foreground text-xs">
+                          <Plus className="h-3.5 w-3.5 mr-1" />Add entry
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-              <Button
-                className="flex-1"
-                onClick={handleSubmit}
-                disabled={loading || (mode === "paste" ? !parsed : validEntries === 0)}
-              >
+              <Button className="flex-1" onClick={handleSubmit}
+                disabled={loading || !parsed || transcript.filter((e) => e.speaker && e.text).length === 0}>
                 {loading ? "Creating..." : "Create Meeting"}
               </Button>
             </div>
