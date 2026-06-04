@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Hintro — Meeting Intelligence",
+  title: "Synthex — Meeting Intelligence",
   description: "AI-powered meeting insights, action items, and follow-ups",
 };
 

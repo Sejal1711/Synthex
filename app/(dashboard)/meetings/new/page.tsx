@@ -4,7 +4,7 @@ export default function NewMeetingPage() {
   return (
     <div className="p-6 space-y-6 max-w-2xl">
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-        Hintro &rsaquo; Meetings &rsaquo; New
+        Synthex &rsaquo; Meetings &rsaquo; New
       </p>
       <div>
         <h1 className="text-xl font-bold text-foreground">New Meeting</h1>

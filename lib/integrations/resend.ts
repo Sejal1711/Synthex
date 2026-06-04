@@ -50,7 +50,7 @@ export async function sendReminderEmail(options: ReminderEmailOptions) {
       <div class="field"><div class="label">Assigned To</div><div class="value">${assignee}</div></div>
       <div class="field"><div class="label">Due Date</div><div class="value" style="color:#dc2626;">${dueDateStr}</div></div>
       <div class="footer">
-        This is an automated reminder from Hintro Meeting Intelligence.
+        This is an automated reminder from Synthex Meeting Intelligence.
       </div>
     </div>
   </div>

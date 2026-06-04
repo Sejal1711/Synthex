@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Brain, LayoutDashboard, Calendar, CheckSquare, LogOut } from "lucide-react";
+import { Crown, LayoutDashboard, Calendar, CheckSquare, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/utils";
@@ -29,9 +29,9 @@ export function Navbar() {
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
-                <Brain className="h-4 w-4 text-primary-foreground" />
+                <Crown className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-sm font-semibold text-foreground">Hintro</span>
+              <span className="text-sm font-semibold text-foreground">Synthex</span>
             </Link>
             <nav className="hidden md:flex items-center gap-0.5">
               {navItems.map(({ href, label, icon: Icon }) => (

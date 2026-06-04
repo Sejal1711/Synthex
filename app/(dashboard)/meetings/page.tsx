@@ -39,7 +39,7 @@ export default function MeetingsPage() {
   return (
     <div className="p-6 space-y-6 max-w-4xl">
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-        Hintro &rsaquo; Meetings
+        Synthex &rsaquo; Meetings
       </p>
 
       <div className="flex items-center justify-between">

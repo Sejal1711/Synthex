@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Brain,
+  Crown,
   LayoutDashboard,
   Calendar,
   CheckSquare,
@@ -74,10 +74,10 @@ export function Sidebar({ userName = "User", userEmail = "" }: SidebarProps) {
               className="flex items-center gap-2 min-w-0"
             >
               <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
-                <Brain className="h-4 w-4 text-primary-foreground" />
+                <Crown className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground leading-tight truncate">Hintro</p>
+                <p className="text-sm font-semibold text-foreground leading-tight truncate">Synthex</p>
                 <p className="text-[10px] text-muted-foreground truncate">Meeting Intelligence</p>
               </div>
             </motion.div>
@@ -85,7 +85,7 @@ export function Sidebar({ userName = "User", userEmail = "" }: SidebarProps) {
         </AnimatePresence>
         {collapsed && (
           <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center mx-auto">
-            <Brain className="h-4 w-4 text-primary-foreground" />
+            <Crown className="h-4 w-4 text-primary-foreground" />
           </div>
         )}
         {!collapsed && (

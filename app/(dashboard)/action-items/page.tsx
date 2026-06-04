@@ -47,7 +47,7 @@ export default function ActionItemsPage() {
   return (
     <div className="p-6 space-y-6 max-w-4xl">
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-        Hintro &rsaquo; Action Items
+        Synthex &rsaquo; Action Items
       </p>
 
       <div>

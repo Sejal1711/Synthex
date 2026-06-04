@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Brain } from "lucide-react";
+import { Crown } from "lucide-react";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 
 export default function RegisterPage() {
@@ -39,9 +39,9 @@ export default function RegisterPage() {
       <div className="absolute top-4 right-4"><ThemeToggle /></div>
       <div className="flex items-center justify-center gap-2 mb-6">
         <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center">
-          <Brain className="h-5 w-5 text-primary-foreground" />
+          <Crown className="h-5 w-5 text-primary-foreground" />
         </div>
-        <span className="text-xl font-bold text-foreground">Hintro</span>
+        <span className="text-xl font-bold text-foreground">Synthex</span>
       </div>
       <Card>
         <CardHeader className="pb-4">

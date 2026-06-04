@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const spec = {
   openapi: "3.0.0",
   info: {
-    title: "Hintro Meeting Intelligence API",
+    title: "Synthex Meeting Intelligence API",
     version: "1.0.0",
     description:
       "AI-powered meeting intelligence service with transcript grounding, action item tracking, and email reminders.",
